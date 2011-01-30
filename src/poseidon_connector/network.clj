@@ -1,21 +1,20 @@
 (ns poseidon-connector.network
   (:use [clojure.contrib server-socket str-utils]
 	[clojure.contrib.io :exclude (spit)])
+  (:require [clojure.contrib.logging :as logger :only []]
+	    [poseidon-connector.frame :as frame :only [push]])
   (:import [java.net Socket]
 	   [java.io BufferedReader InputStreamReader OutputStreamWriter DataInputStream]))
 
 
-(defn process-frame
-  "Processes POSEIDON frame (as string). Splits it into 41 constituent fields"
-  [#^String frame]
-  (re-split #";" frame))
+
 
 (def message (atom nil))
 
 (defn reset-message []
   (swap! message (fn [_] nil)))
 
-(def log (agent ()))
+
 
 (defn from-big-endian
   "Converts 2 bytes in big endian order into an int"
@@ -28,13 +27,21 @@
   "Reads a frame of data "
   [in out]
   (let [input (DataInputStream. in)
-	length (- (.readUnsignedShort input) 2)
-					;frame  (repeatedly length #(.readChar input))
-	frame (repeatedly (fn []
-		  (try (char (.readByte input))
-		       (catch java.io.EOFException e nil))))
+	length (.readUnsignedShort input) 
+				
+	content (apply str ; may need to use doall to realise the lazy- seq
+	       (take (- length 2) ; 2 bytes have already been read
+		     (repeatedly (fn []
+			      (try (char (.readByte input))
+				   (catch java.io.EOFException e nil)
+				   (catch Exception e (logger/error e)))))))
+	frame {:length length
+	       :content content
+	       :timestamp (java.util.Date.)}
 	]
-    (swap! message (fn [_] (apply str (take length frame))))
+    (logger/info "Frame received.")
+    (logger/debug frame)
+    (frame/push frame)
     ))
 
 (defn echo
@@ -51,13 +58,6 @@
       (flush))
     (recur))))
 
-(defn connector
-  ""
-  [input-stream output-stream]
-  (binding [*in* (BufferedReader. (InputStreamReader. input-stream))]    
-    ())
-  ;TODO(
-  )
 
 (defn start-server
   "Starts the server on the specified port"
@@ -91,3 +91,11 @@
     (print msg)
     (flush)))
 
+(def *test-frame* (str (char 1) "!65129405;00000000;000020;2043129405;091218;094557;90;2205;0;0;0;091218;094644000;0;0;999;0;0;04;0;0;0;0;0;0;0;;1;0;0;0088;1;0;;;;;07;$UTS1;10.100.103.23;DIAG;                                                                                                                                 "))
+
+(defn test-message
+  "Creates a socket on the specified port and sends the message specified by the*test-frame*. The socket is then closed."
+  [port]
+  (let [clt (start-client port)]
+    (send-message clt *test-frame*)
+    (.close (:socket clt))))

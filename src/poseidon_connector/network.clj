@@ -6,35 +6,26 @@
   (:import [java.net Socket]
 	   [java.io BufferedReader InputStreamReader OutputStreamWriter DataInputStream]))
 
-
-
-
-(def message (atom nil))
-
-(defn reset-message []
-  (swap! message (fn [_] nil)))
-
-
+(def *servers* (ref {})) ; map of the {port server} used for the stop-server
 
 (defn from-big-endian
   "Converts 2 bytes in big endian order into an int"
   [b1 b2]
   (bit-or (bit-shift-left (int b1) 8) b2))
 
-
-
 (defn read-frame
   "Reads a frame of data "
   [in out]
   (let [input (DataInputStream. in)
 	length (.readUnsignedShort input) 
-				
-	content (apply str ; may need to use doall to realise the lazy- seq
-	       (take (- length 2) ; 2 bytes have already been read
-		     (repeatedly (fn []
-			      (try (char (.readByte input))
-				   (catch java.io.EOFException e nil)
-				   (catch Exception e (logger/error e)))))))
+	content
+	(apply str ; may need to use doall to realise the lazy- seq
+	       (doall
+		(take (- length 2)    ; 2 bytes have already been read
+		      (repeatedly (fn []
+				    (try (char (.readByte input))
+					 (catch java.io.EOFException e nil)
+					 (catch Exception e (logger/error e))))))))
 	frame {:length length
 	       :content content
 	       :timestamp (java.util.Date.)}
@@ -48,12 +39,11 @@
 "An echo function for an echo server"
 [in out]
 (binding [*in* (BufferedReader. (InputStreamReader. in))
-	 ; *out* (OutputStreamWriter. out)
+	  *out* (OutputStreamWriter. out)
 	  ]
   (print "Welcome to the ECho Server\r\n")
   (loop []
     (let [input (read-line)]
-      (swap! message (fn [_] input))
       (print (str input "\r\n>"))
       (flush))
     (recur))))
@@ -62,12 +52,18 @@
 (defn start-server
   "Starts the server on the specified port"
   [port]
-  (create-server port read-frame))
+  (let [server (create-server port read-frame)]
+    (dosync alter *servers* assoc port server)
+    (logger/info (str "Poseidon connector server started on port " port "/n"))
+    server))
 
-(defn stop
-  [serv]
-  "Stops the server"
-  (close-server serv))
+(defn stop-server
+  [port]
+  "Stops the server on the specified port"
+  (dosync
+   (when-let [server (get @*servers* port)]
+     (alter *servers* dissoc port)
+     (close-server server))))
 
 (defn echo-server
   "Starts the server on the specified port"

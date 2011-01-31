@@ -1,10 +1,14 @@
 (ns poseidon-connector.core
   (:gen-class)
   (:use clojure.contrib.command-line)
-  (:require [poseidon-connector.network :as net])
+  (:require [poseidon-connector.network :as net]
+	    [poseidon-connector.properties :as prop])
  )
 
-
+(defn start
+  "Starting the connector on the specified port"
+  [port]
+  )
 
 (defn -main [& args]
   (with-command-line args

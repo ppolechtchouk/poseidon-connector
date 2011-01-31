@@ -36,6 +36,7 @@
 			   "actual " n " fields."))
 	false))))
 
+
 (defn process-frame
   "If frame is valid, returns processed content. If it is not valid, the errors are logged and nil is returned"
   [frame]
@@ -48,17 +49,22 @@
 (defn push
   "If frame is valid adds processed frame content to the end of the frame queue. If invalid, errors are logged and nothing is added."
   [frame]
-  (let [pf (process-frame frame)]
-    (when pf
-     (dosync
-      (alter *frames* conj pf)))))
+  (when-let [pf (process-frame frame)]
+    (dosync (alter *frames* conj pf))))
 
-(defn next-frame
+(defn pull
   "Removes a processed frame from the frame queue and returns the frame. If the queue is empty returns nil"
   []
   (dosync
-   (let [frame (peek @*frames*)]
-     (when frame
-       (alter *frames* pop)
-       frame))))
+   (when-let [frame (peek @*frames*)]
+     (alter *frames* pop)
+     frame)))
+
+(defn blocking-pull
+  "Like pull, only blocks until a frame can be read"
+  []
+  ; TODO use sleep or yeild ?
+  (if-let [frame (pull)] 
+    frame
+    (recur)))
 

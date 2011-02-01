@@ -1,4 +1,4 @@
-(ns poseidon-connector.frame
+(ns poseidon.connector.frame
   (:require [clojure.contrib.logging :as logger]
 	    [clojure.contrib.str-utils :as string]))
 

@@ -1,4 +1,4 @@
-(ns poseidon-connector.properties
+(ns poseidon.connector.properties
   (:require [clojure.contrib.properties :as prop :only []]))
 
 (def *properties-file* "db.properties")

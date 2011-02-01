@@ -1,8 +1,8 @@
-(ns poseidon-connector.network
+(ns poseidon.connector.network
   (:use [clojure.contrib server-socket str-utils]
 	[clojure.contrib.io :exclude (spit)])
   (:require [clojure.contrib.logging :as log :only []]
-	    [poseidon-connector.frame :as frame :only [push]])
+	    [poseidon.connector.frame :as frame :only [push]])
   (:import [java.net Socket]
 	   [java.io BufferedReader InputStreamReader OutputStreamWriter DataInputStream]))
 
@@ -27,8 +27,7 @@
 					 (catch java.io.EOFException e nil)
 					 (catch Exception e (log/error e))))))))
 	frame {:length length
-	       :content content
-	       :timestamp (java.util.Date.)}
+	       :content content}
 	]
     (log/info "Frame received.")
     (log/debug frame)

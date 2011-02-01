@@ -1,9 +1,9 @@
-(ns poseidon-connector.core
+(ns poseidon.connector.core
   (:gen-class)
   (:use clojure.contrib.command-line)
-  (:require [poseidon-connector.network :as net]
-	    [poseidon-connector.db :as db]
-	    [poseidon-connector.properties :as prop]
+  (:require [poseidon.connector.network :as net]
+	    [poseidon.connector.db :as db]
+	    [poseidon.connector.properties :as prop]
 	    [clojure.contrib.logging :as log]))
 
 

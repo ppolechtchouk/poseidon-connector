@@ -1,6 +1,6 @@
-(ns poseidon-connector.db
-  (:require [poseidon-connector.properties :as prop]
-	    [poseidon-connector.frame :as frame]
+(ns poseidon.connector.db
+  (:require [poseidon.connector.properties :as prop]
+	    [poseidon.connector.frame :as frame]
 	    [clojure.contrib.sql :as sql]
 	    [clojure.contrib.logging :as log]
 	    ))

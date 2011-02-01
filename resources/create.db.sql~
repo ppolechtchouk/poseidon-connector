@@ -1,0 +1,36 @@
+DROP DATABASE IF EXISTS poseidondb;
+DROP ROLE IF EXISTS poseidon;
+
+
+CREATE ROLE poseidon LOGIN PASSWORD 'poseidon';
+CREATE DATABASE poseidondb OWNER poseidon;
+
+\connect poseidondb poseidon
+
+CREATE TRUSTED PROCEDURAL LANGUAGE 'plpgsql'
+  HANDLER plpgsql_call_handler
+  VALIDATOR plpgsql_validator;
+
+CREATE SCHEMA poseidon AUTHORIZATION poseidon;
+
+CREATE TABLE poseindon.frames {
+       field1 VARCHAR(8), -- TID
+       field2 VARCHAR(8), -- invoice code
+       field3 VARCHAR(6), -- trace nr
+       field4 VARCHAR(10), -- onum
+       field5 CHAR(6), -- date POS YYMMDD
+       field6 CHAR(6), -- time POS HHMMSS
+       field7 CHAR(2), -- txn code
+       field8 VARCHAR(4), -- receipt number
+       field9 VARCHAR(6), -- txn trace number for cancellation
+       field10 CHAR(6), -- original date POS YYMMDD
+       field11 CHAR(6), -- original time POS HHMMSS
+       field12 CHAR(6), -- original date POSEIDON YYMMDD
+       field13 CHAR(9), -- original time POSEIDON HHMMSSTTT
+       field14 VARCHAR(12), -- amount in smalles unit - i.e. cents for EUR. Negative amounts have - on the left
+       field15 VARCHAR(3), -- currency code or 0
+
+
+       is_synced BOOLEAN DEFAULT FALSE
+}
+

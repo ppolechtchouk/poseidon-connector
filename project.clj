@@ -1,4 +1,4 @@
-(defproject poseidon-connector "0.5.0"
+(defproject poseidon-connector "0.9.0"
   :description "A connector between POSEIDON TCP stream and e-Portal DB"
   :dependencies [[org.clojure/clojure "1.2.0"]
                  [org.clojure/clojure-contrib "1.2.0"]

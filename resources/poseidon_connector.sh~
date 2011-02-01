@@ -1,0 +1,5 @@
+#!/bin/bash
+
+java -server -cp lib/* poseidon.connector.core -start -p 7654
+
+# place db.properties and log4j.properties in the current working dir

@@ -53,8 +53,9 @@
   "Starts the server on the specified port"
   [port]
   (let [server (create-server port read-frame)]
-    (dosync alter *servers* assoc port server)
-    (log/info (str "Poseidon connector server started on port " port "/n"))
+    (dosync
+     (alter *servers* assoc port server))
+    (log/info (str "Server started on port " port ))
     server))
 
 (defn stop-server
@@ -65,13 +66,12 @@
      ((alter *servers* dissoc port)
       (close-server server)
       (log/info (str "Server on port " port " stopped.")))
-     (log/warning (str "No server running on port " port)))))
+     (log/warn (str "No server running on port " port)))))
 
 (defn stop-all
   "Stops all running servers."
   []
-  (dosync
-   (doseq [port (keys @*servers*)] (stop-server port))))
+  (doseq [port (keys @*servers*)] (stop-server port)))
 
 (defn echo-server
   "Starts the server on the specified port"

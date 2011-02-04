@@ -21,6 +21,7 @@
   (with-command-line args
     "Poseidon connector server. Use db.properties file to configure the db connection. CTRL-C in the console window to stop the server."
     [ [start? "Starts the connector server on the specified port"]
+      [echo? "Starts an echo server on the specified port"]
       [test? "Send a test message to the server on the specified port"]
       [port p "Server port" "7654"]
       remaining ]
@@ -32,7 +33,14 @@
 	      (net/start-server (Integer/parseInt port))
 	      (db/start-db-dispatch)
 	      )
+     echo? (do
+	      (log/info "Poseidon Connector starting...")
+	      (.addShutdownHook (Runtime/getRuntime) (Thread. shutdown))
+	      (net/start-server (Integer/parseInt port) net/echo)
+	      (db/start-db-dispatch)
+	      )
 	      
      test? (net/test-message (Integer/parseInt port))
+     
      :else (println "Use -help parameter to get extended help")
      )))

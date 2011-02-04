@@ -40,22 +40,26 @@
 (binding [*in* (BufferedReader. (InputStreamReader. in))
 	  *out* (OutputStreamWriter. out)
 	  ]
-  (print "Welcome to the ECho Server\r\n")
+  (print "Welcome to the Echo Server\r\nType quit to exit\r\n")
   (loop []
     (let [input (read-line)]
-      (print (str input "\r\n>"))
-      (flush))
-    (recur))))
+      (if (= input "quit")
+	(println "Exiting...")
+	(do
+	  (print (str input "\r\n>"))
+	  (flush)
+	  (recur)))))))
 
 
 (defn start-server
-  "Starts the server on the specified port"
-  [port]
-  (let [server (create-server port read-frame)]
-    (dosync
-     (alter *servers* assoc port server))
-    (log/info (str "Server started on port " port ))
-    server))
+  "Starts the server on the specified port using f as the work function. If no function is specified, read-frame is used. "
+  ([port] (start-server port read-frame))
+  ([port f]
+     (let [server (create-server port f)]
+       (dosync
+	(alter *servers* assoc port server))
+       (log/info (str "Server started on port " port ))
+       server)))
 
 (defn stop-server
   [port]
@@ -92,7 +96,8 @@
   [client msg]
   (binding [*out* (:out client)]
     (print msg)
-    (flush)))
+    (flush)
+    client))
 
 (def *test-frame* (str (char 1) "!65129405;00000000;000020;2043129405;091218;094557;90;2205;0;0;0;091218;094644000;0;0;999;0;0;04;0;0;0;0;0;0;0;;1;0;0;0088;1;0;;;;;07;$UTS1;10.100.103.23;DIAG;                                                                                                                                 "))
 

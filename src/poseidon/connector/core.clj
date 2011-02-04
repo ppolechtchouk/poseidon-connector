@@ -36,9 +36,7 @@
      echo? (do
 	      (log/info "Poseidon Connector starting...")
 	      (.addShutdownHook (Runtime/getRuntime) (Thread. shutdown))
-	      (net/start-server (Integer/parseInt port) net/echo)
-	      (db/start-db-dispatch)
-	      )
+	      (net/start-server (Integer/parseInt port) net/echo))
 	      
      test? (net/test-message (Integer/parseInt port))
      
